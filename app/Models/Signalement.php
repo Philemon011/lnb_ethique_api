@@ -16,4 +16,9 @@ class Signalement extends Model
         'code_de_suivi',
         "status_id",
     ];
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
 }
