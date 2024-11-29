@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Seeders;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -10,8 +11,28 @@ class TypeDeSignalementSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
-        //
+        $types = [
+            'Corruption',
+            'Fraude',
+            'Harcèlement',
+            'Discrimination',
+            'Atteintes aux droits humains',
+            'Crimes',
+            'Blanchiment de capitaux',
+            'Suggestions et propositions  d\'amélioration',
+        ];
+
+        foreach ($types as $type) {
+            // Vérifie si le libellé existe déjà
+            if (!DB::table('type_de_signalement')->where('libelle', $type)->exists()) {
+                DB::table('type_de_signalement')->insert([
+                    'libelle' => $type,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
     }
 }
