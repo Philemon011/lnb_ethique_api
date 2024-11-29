@@ -119,4 +119,13 @@ class SignalementController extends Controller
         return new PostResource(true, 'signalement modifié avec succès', $signalement);
 
     }
+
+    public function destroy(Signalement $signalement)
+    {
+
+        $signalement->delete();
+
+        //return response
+        return new PostResource(true, 'Signalement supprimé avec sucess', null);
+    }
 }
