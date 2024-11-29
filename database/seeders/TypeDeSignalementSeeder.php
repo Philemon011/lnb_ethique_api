@@ -26,8 +26,8 @@ class TypeDeSignalementSeeder extends Seeder
 
         foreach ($types as $type) {
             // Vérifie si le libellé existe déjà
-            if (!DB::table('type_de_signalement')->where('libelle', $type)->exists()) {
-                DB::table('type_de_signalement')->insert([
+            if (!DB::table('type_signalements')->where('libelle', $type)->exists()) {
+                DB::table('type_signalements')->insert([
                     'libelle' => $type,
                     'created_at' => now(),
                     'updated_at' => now(),

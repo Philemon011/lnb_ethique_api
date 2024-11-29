@@ -22,8 +22,8 @@ class StatusSeeder extends Seeder
 
         foreach ($statuses as $status) {
             // Vérifie si le libellé existe déjà
-            if (!DB::table('status')->where('nom_status', $status)->exists()) {
-                DB::table('status')->insert([
+            if (!DB::table('statuses')->where('nom_status', $status)->exists()) {
+                DB::table('statuses')->insert([
                     'nom_status' => $status,
                     'created_at' => now(),
                     'updated_at' => now(),

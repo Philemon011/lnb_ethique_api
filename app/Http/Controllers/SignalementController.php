@@ -17,6 +17,14 @@ class SignalementController extends Controller
         'piece_jointe' => 'nullable|file|mimes:jpeg,png,pdf,doc,docx,mp4,mkv,avi,mov|max:10240',
     ]);
 
+    // Récupération dynamique de l'ID du statut "Non traité"
+    $statusNonTraite = \App\Models\Status::where('nom_status', 'Non traité')->first();
+    if (!$statusNonTraite) {
+        return response()->json([
+            'message' => 'Le statut "Non traité" est introuvable. Veuillez vérifier vos données.',
+        ], 500);
+    }
+
     // Génération du code de suivi
     $codeDeSuivi = strtoupper(uniqid('XYZ-'));
 
@@ -32,7 +40,7 @@ class SignalementController extends Controller
         'description' => $request->description,
         'piece_jointe' => $cheminPieceJointe,
         'code_de_suivi' => $codeDeSuivi,
-        'status_id' => 1, // Par défaut, mettons "non traité"
+        'status_id' => $statusNonTraite->id, // Par défaut, mettons "non traité"
     ]);
     return new PostResource(true, 'Status modifié avec succès', $signalement);
 }
