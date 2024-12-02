@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             StatusSeeder::class,
             TypeDeSignalementSeeder::class,
+            RaisonSeeder::class,
         ]);
     }
 }
