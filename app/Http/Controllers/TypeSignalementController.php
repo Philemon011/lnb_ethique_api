@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\TypeSignalement;
@@ -11,10 +12,14 @@ class TypeSignalementController extends Controller
     public function index()
     {
         //get status
-        $typeSignalement = TypeSignalement::latest()->paginate(200);
+        $typeSignalement = TypeSignalement::latest()->get();
 
         //return collection of posts as a resource
-        return new PostResource(true, 'Liste des types de Signalement', $typeSignalement);
+        return response([
+            'success' => true,
+            'data' => $typeSignalement,
+            'message' => "Liste des types de Signalement",
+        ], 200);
     }
 
 
@@ -22,7 +27,7 @@ class TypeSignalementController extends Controller
     {
         //define validation rules
         $validator = Validator::make($request->all(), [
-          "libelle" =>'required',
+            "libelle" => 'required',
         ]);
 
         //check if validation fails
@@ -31,19 +36,22 @@ class TypeSignalementController extends Controller
         }
 
 
-        $typeSignalement=TypeSignalement::create([
-            "libelle"=> $request->libelle,
+        TypeSignalement::create([
+            "libelle" => $request->libelle,
         ]);
 
         //return response
-        return new PostResource(true, 'le type de Signalement a été bien enrégistré !', $typeSignalement);
+        return response([
+            'success' => true,
+            'message' => "le type de Signalement a été bien enrégistré !",
+        ], 201);
     }
 
     public function update(Request $request, TypeSignalement $typeSignalement)
     {
         //define validation rules
         $validator = Validator::make($request->all(), [
-            'libelle'=> 'required',
+            'libelle' => 'required',
         ]);
 
         //check if validation fails
@@ -52,22 +60,27 @@ class TypeSignalementController extends Controller
         }
 
         $typeSignalement->update([
-            "libelle"=> $request->libelle,
+            "libelle" => $request->libelle,
         ]);
 
 
         //return response
-        return new PostResource(true, 'type de Signalement modifié avec succès', $typeSignalement);
+        return response([
+            'success' => true,
+            'message' => "le type de Signalement a été bien modifié !",
+        ], 200);
     }
 
-    public function destroy(typeSignalement $typeSignalement)
+    public function destroy(TypeSignalement $typeSignalement)
     {
 
         //delete status
         $typeSignalement->delete();
 
         //return response
-        return new PostResource(true, 'type de Signalement supprimé', null);
+        return response([
+            'success' => true,
+            'message' => "le type de Signalement a été bien supprimé !",
+        ], 200);
     }
-
 }

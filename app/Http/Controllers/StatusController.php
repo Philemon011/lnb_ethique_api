@@ -13,10 +13,14 @@ class StatusController extends Controller
     public function index()
     {
         //get status
-        $status = status::latest()->paginate(200);
+        $status = status::latest()->get();
 
-        //return collection of posts as a resource
-        return new PostResource(true, 'Liste des status', $status);
+        //return collection of status as a resource
+        return response([
+            'success' => true,
+            'data' => $status,
+            'message' => "Liste des status",
+        ], 200);
     }
 
 
@@ -38,7 +42,10 @@ class StatusController extends Controller
         ]);
 
         //return response
-        return new PostResource(true, 'le Status a été bien enrégistré !', $status);
+        return response([
+            'success' => true,
+            'message' => "le status a été bien enrégistré !",
+        ], 201);
     }
 
     public function update(Request $request, status $status)
@@ -59,7 +66,10 @@ class StatusController extends Controller
 
 
         //return response
-        return new PostResource(true, 'Status modifié avec succès', $status);
+        return response([
+            'success' => true,
+            'message' => "le status a été bien modifié !",
+        ], 200);
     }
 
     public function destroy(status $status)
@@ -69,8 +79,10 @@ class StatusController extends Controller
         $status->delete();
 
         //return response
-        return new PostResource(true, 'Status supprimé', null);
-    }
+        return response([
+            'success' => true,
+            'message' => "le status a été bien supprimé !",
+        ], 200);    }
 
 
 }
