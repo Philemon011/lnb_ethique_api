@@ -15,6 +15,7 @@ class Signalement extends Model
         'piece_jointe',
         'code_de_suivi',
         "status_id",
+        'cloturer_verification',
     ];
 
     public function status()
