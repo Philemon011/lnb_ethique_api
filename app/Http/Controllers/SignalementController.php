@@ -17,15 +17,20 @@ class SignalementController extends Controller
     public function index()
     {
         //get posts
-        $signalement = Signalement::latest()->paginate(200);
+        $signalement = Signalement::latest()->get();
         $signalement = DB::table('signalements')
             ->join('type_signalements', 'signalements.type_de_signalement_id', '=', 'type_signalements.id')
             ->join('statuses', 'signalements.status_id', '=', 'statuses.id')
             ->select('signalements.*', 'type_signalements.libelle', 'statuses.nom_status')
             ->get();
 
-        //return collection of posts as a resource
-        return new PostResource(true, 'Liste des Signalements', $signalement);
+        //return collection of signalements as a resource
+
+        return response([
+            'success' => true,
+            'data' => $signalement,
+            'message' => "Liste des signalements",
+        ], 200);
     }
 
 
@@ -56,7 +61,7 @@ class SignalementController extends Controller
         // Gestion du fichier pièce jointe
         $cheminPieceJointe = null;
         if ($request->hasFile('piece_jointe')) {
-            $cheminPieceJointe = $request->file('piece_jointe')->store('signalements/pieces_jointes');
+            $cheminPieceJointe = $request->file('piece_jointe')->store('signalements/pieces_jointes', 'public');
         }
 
         // Création du signalement
@@ -67,17 +72,15 @@ class SignalementController extends Controller
             'code_de_suivi' => $codeDeSuivi,
             'status_id' => $statusNonTraite->id, // Par défaut, mettons "non traité"
         ]);
-        return new PostResource(true, 'Status modifié avec succès', $signalement);
+        return new PostResource(true, 'Signalement ajouté avec succès', $signalement);
     }
 
     public function update(Request $request, Signalement $signalement)
     {
         // Validation des données
         $validator = Validator::make($request->all(), [
-            'type_de_signalement_id' => 'required|exists:type_signalements,id',
-            'description' => 'required|string',
-            'piece_jointe' => 'nullable|file|mimes:jpeg,png,pdf,doc,docx,mp4,mkv,avi,mov|max:10240',
             'status_id' => 'nullable|exists:statuses,id',
+            'cloturer_verification' => 'nullable|in:oui,non'
         ]);
 
 
@@ -96,22 +99,8 @@ class SignalementController extends Controller
             }
         }
 
-        // Mise à jour du fichier pièce jointe
-        if ($request->hasFile('piece_jointe')) {
-            // Suppression de l'ancienne pièce jointe si elle existe
-            if ($signalement->piece_jointe && Storage::exists($signalement->piece_jointe)) {
-                Storage::delete($signalement->piece_jointe);
-            }
-
-            // Enregistrement du nouveau fichier
-            $cheminPieceJointe = $request->file('piece_jointe')->store('signalements/pieces_jointes');
-            $signalement->piece_jointe = $cheminPieceJointe;
-        }
-
-        // Mise à jour des autres champs
         $signalement->update([
-            'type_de_signalement_id' => $request->type_de_signalement_id,
-            'description' => $request->description,
+            'cloturer_verification' => $request->cloturer_verification ?? $signalement->cloturer_verification,
             'status_id' => $request->status_id ?? $signalement->status_id, // Garde le statut actuel si non spécifié
         ]);
 
