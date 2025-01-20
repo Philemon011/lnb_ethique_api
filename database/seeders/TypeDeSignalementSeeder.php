@@ -21,7 +21,8 @@ class TypeDeSignalementSeeder extends Seeder
             'Atteintes aux droits humains',
             'Crimes',
             'Blanchiment de capitaux',
-            'Suggestions et propositions  d\'amélioration',
+            'Suggestions',
+            'Propositions d\'amélioration',
         ];
 
         foreach ($types as $type) {

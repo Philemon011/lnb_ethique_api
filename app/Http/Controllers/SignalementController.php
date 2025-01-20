@@ -22,6 +22,7 @@ class SignalementController extends Controller
             ->join('type_signalements', 'signalements.type_de_signalement_id', '=', 'type_signalements.id')
             ->join('statuses', 'signalements.status_id', '=', 'statuses.id')
             ->select('signalements.*', 'type_signalements.libelle', 'statuses.nom_status')
+            ->orderBy('signalements.created_at', 'desc')
             ->get();
 
         //return collection of signalements as a resource
@@ -39,7 +40,7 @@ class SignalementController extends Controller
         $validator = Validator::make($request->all(), [
             'type_de_signalement_id' => 'required|exists:type_signalements,id',
             'description' => 'required|string',
-            'piece_jointe' => 'nullable|file|mimes:jpeg,png,pdf,doc,docx,mp4,mkv,avi,mov|max:10240',
+            'piece_jointe' => 'nullable|file|mimes:jpeg,jpg,png,pdf,doc,docx,mp4,mkv,avi,mov,mp3|max:10240',
         ]);
 
         //check if validation fails
@@ -72,7 +73,13 @@ class SignalementController extends Controller
             'code_de_suivi' => $codeDeSuivi,
             'status_id' => $statusNonTraite->id, // Par défaut, mettons "non traité"
         ]);
-        return new PostResource(true, 'Signalement ajouté avec succès', $signalement);
+        // return new PostResource(true, 'Signalement ajouté avec succès', $signalement);
+        return response([
+            'success' => true,
+            'message' => "le Signalement a été bien enrégistré !",
+            'signalement'=>$signalement,
+            'code_de_suivi' => $codeDeSuivi
+        ], 201);
     }
 
     public function update(Request $request, Signalement $signalement)
@@ -80,7 +87,8 @@ class SignalementController extends Controller
         // Validation des données
         $validator = Validator::make($request->all(), [
             'status_id' => 'nullable|exists:statuses,id',
-            'cloturer_verification' => 'nullable|in:oui,non'
+            'cloturer_verification' => 'nullable|in:oui,non',
+            'raison' => 'nullable'
         ]);
 
 
@@ -101,11 +109,15 @@ class SignalementController extends Controller
 
         $signalement->update([
             'cloturer_verification' => $request->cloturer_verification ?? $signalement->cloturer_verification,
+            'raison' => $request->raison ?? $signalement->raison,
             'status_id' => $request->status_id ?? $signalement->status_id, // Garde le statut actuel si non spécifié
         ]);
 
         // Retourne une réponse avec le signalement mis à jour
-        return new PostResource(true, 'signalement modifié avec succès', $signalement);
+        return response([
+            'success' => true,
+            'message' => "le  Signalement a été bien modifié !",
+        ], 200);
 
     }
 

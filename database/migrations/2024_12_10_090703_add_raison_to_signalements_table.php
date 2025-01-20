@@ -12,12 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('signalements', function (Blueprint $table) {
-
-            $table->unsignedBigInteger('raison_id');
-
-            $table->foreign('type_de_signalement_id')
-                ->references('id')
-                ->on('type_signalements');
+            $table->string('raison')->default('pas objet de procédure judiciaire ou disciplinaire');
         });
     }
 
@@ -27,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('signalements', function (Blueprint $table) {
-            //
+            $table->dropColumn('raison');
         });
     }
 };
