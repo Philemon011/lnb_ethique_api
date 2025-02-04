@@ -40,6 +40,7 @@ class SignalementController extends Controller
         $validator = Validator::make($request->all(), [
             'type_de_signalement_id' => 'required|exists:type_signalements,id',
             'description' => 'required|string',
+            'date_evenement' => 'required|date',
             'piece_jointe' => 'nullable|file|mimes:jpeg,jpg,png,pdf,doc,docx,mp4,mkv,avi,mov,mp3|max:10240',
         ]);
 
@@ -69,6 +70,7 @@ class SignalementController extends Controller
         $signalement = Signalement::create([
             'type_de_signalement_id' => $request->type_de_signalement_id,
             'description' => $request->description,
+            'date_evenement' => $request->date_evenement,
             'piece_jointe' => $cheminPieceJointe,
             'code_de_suivi' => $codeDeSuivi,
             'status_id' => $statusNonTraite->id, // Par défaut, mettons "non traité"
@@ -77,10 +79,44 @@ class SignalementController extends Controller
         return response([
             'success' => true,
             'message' => "le Signalement a été bien enrégistré !",
-            'signalement'=>$signalement,
+            'signalement' => $signalement,
             'code_de_suivi' => $codeDeSuivi
         ], 201);
     }
+
+    public function getSignalementByCodeDeSuivi(Request $request)
+    {
+        // Validation du code de suivi
+        $validator = Validator::make($request->all(), [
+            'code_de_suivi' => 'required|string|exists:signalements,code_de_suivi',
+        ]);
+
+        // Vérification des erreurs de validation
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // Recherche du signalement par code de suivi
+        $signalement = Signalement::where('code_de_suivi', $request->code_de_suivi)
+            ->join('type_signalements', 'signalements.type_de_signalement_id', '=', 'type_signalements.id')
+            ->join('statuses', 'signalements.status_id', '=', 'statuses.id')
+            ->first();
+
+        if (!$signalement) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun signalement trouvé avec ce code de suivi.',
+            ], 404);
+        }
+
+        // Retourner les informations du signalement
+        return response()->json([
+            'success' => true,
+            'message' => 'Signalement récupéré avec succès.',
+            'data' => $signalement,
+        ], 200);
+    }
+
 
     public function update(Request $request, Signalement $signalement)
     {
@@ -118,7 +154,6 @@ class SignalementController extends Controller
             'success' => true,
             'message' => "le  Signalement a été bien modifié !",
         ], 200);
-
     }
 
     public function destroy(Signalement $signalement)

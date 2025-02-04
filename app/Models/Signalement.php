@@ -16,6 +16,7 @@ class Signalement extends Model
         'code_de_suivi',
         "status_id",
         'cloturer_verification',
+        'date_evenement',
         'raison',
     ];
 
