@@ -14,3 +14,16 @@ Route::apiResource('/typeSignalement', App\Http\Controllers\TypeSignalementContr
 Route::apiResource('/signalement', App\Http\Controllers\SignalementController::class);
 Route::apiResource('/raison', App\Http\Controllers\RaisonController::class);
 Route::post('/getSignalementByCodeDeSuivi', 'App\Http\Controllers\SignalementController@getSignalementByCodeDeSuivi');
+
+
+
+Route::controller(App\Http\Controllers\RegisterController::class)->group(function()
+{
+    Route::post('register', 'register');
+    Route::post('login', 'login');
+    Route::get('me', 'getAuthenticatedUser')->middleware('auth:sanctum');
+    Route::get('logout', 'logout')->middleware('auth:sanctum');
+    // Route::post('modifier_mot_de_passe', 'update');
+    // Route::post('modifier_mot_de_passe_par_mail', 'sendResetLinkEmail');
+    // Route::post('reset-password', 'resetPassword');
+});
