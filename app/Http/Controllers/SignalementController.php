@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Signalement;
 use App\Http\Resources\PostResource;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -34,6 +35,26 @@ class SignalementController extends Controller
         ], 200);
     }
 
+    public function getUserSignalements($user_id)
+    {
+        $user = User::where('id', $user_id)->first();
+        if (!$user) {
+            return response()->json(['message' => 'Ce user n\'existe pas'], 404);
+        }
+        //get posts
+        $signalement = Signalement::latest()->paginate(200);
+        $signalement=DB::table('signalements')
+                                ->join('users','signalements.user_id' , '=', 'users.id')
+                                ->select('signalements.*')
+                                ->where('users.id', $user->id)
+                                ->get();
+        return response([
+            'success' => true,
+            'data' => $signalement,
+            'message' => "Liste des signalements",
+        ], 200);
+    }
+
 
     public function store(Request $request)
     {
@@ -41,6 +62,7 @@ class SignalementController extends Controller
             'type_de_signalement_id' => 'required|exists:type_signalements,id',
             'description' => 'required|string',
             'date_evenement' => 'required|date',
+            'user_id' => 'nullable|exists:users,id',
             'piece_jointe' => 'nullable|file|mimes:jpeg,jpg,png,pdf,doc,docx,mp4,mkv,avi,mov,mp3|max:10240',
         ]);
 
@@ -71,6 +93,7 @@ class SignalementController extends Controller
             'type_de_signalement_id' => $request->type_de_signalement_id,
             'description' => $request->description,
             'date_evenement' => $request->date_evenement,
+            'user_id' => $request->user_id ?? null,
             'piece_jointe' => $cheminPieceJointe,
             'code_de_suivi' => $codeDeSuivi,
             'status_id' => $statusNonTraite->id, // Par défaut, mettons "non traité"

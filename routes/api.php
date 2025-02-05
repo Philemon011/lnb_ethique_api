@@ -14,6 +14,8 @@ Route::apiResource('/typeSignalement', App\Http\Controllers\TypeSignalementContr
 Route::apiResource('/signalement', App\Http\Controllers\SignalementController::class);
 Route::apiResource('/raison', App\Http\Controllers\RaisonController::class);
 Route::post('/getSignalementByCodeDeSuivi', 'App\Http\Controllers\SignalementController@getSignalementByCodeDeSuivi');
+Route::get('/messignalements/{user_id}', 'App\Http\Controllers\SignalementController@getUserSignalements');
+
 
 
 

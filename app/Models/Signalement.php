@@ -18,6 +18,7 @@ class Signalement extends Model
         'cloturer_verification',
         'date_evenement',
         'raison',
+        'user_id',
     ];
 
     public function status()

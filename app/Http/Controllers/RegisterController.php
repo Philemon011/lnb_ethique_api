@@ -33,11 +33,13 @@ class RegisterController extends Controller
 
         $user = User::create($input);
         $token =  $user->createToken('MyApp')->plainTextToken;
+        $user_id =  $user->id;
         $name =  $user->name;
         $email =  $user->email;
         $role_id= $user->role_id;
 
         return response([
+            'user_id' => $user_id,
             'token' => $token,
             'name' => $name,
             'email' => $email,
@@ -55,10 +57,12 @@ class RegisterController extends Controller
 
             $token=  $user->createToken('MyApp')->plainTextToken;
             $name=  $user->name;
+            $user_id=  $user->id;
             $email=  $user->email;
 
             return response([
                 'token' => $token,
+                'user_id' => $user_id,
                 'name' => $name,
                 'email' => $email,
                 'role_id' => $role_id,
