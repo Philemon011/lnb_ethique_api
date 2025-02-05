@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -25,15 +26,22 @@ class RegisterController extends Controller
 
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
-        // Ajouter le rôle par défaut
+
+        // Ajouter le rôle utilisateur par défaut
+        $id_role_user = DB::table('roles')->select('id')->where('niveau', '=', 3)->first();
+        $input['role_id'] = $id_role_user->id;
 
         $user = User::create($input);
         $token =  $user->createToken('MyApp')->plainTextToken;
         $name =  $user->name;
+        $email =  $user->email;
+        $role_id= $user->role_id;
 
         return response([
             'token' => $token,
             'name' => $name,
+            'email' => $email,
+            'role_id' => $role_id,
             'message' => "User register successfully.",
         ], 201);
     }
@@ -43,19 +51,17 @@ class RegisterController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
 
-            $role= $user->role;
+            $role_id= $user->role_id;
 
             $token=  $user->createToken('MyApp')->plainTextToken;
             $name=  $user->name;
             $email=  $user->email;
-            $user=  $user;
 
             return response([
                 'token' => $token,
                 'name' => $name,
                 'email' => $email,
-                'user' => $user,
-                'role' => $role,
+                'role_id' => $role_id,
                 'message' => "User login successfully.",
             ], 200);
 
