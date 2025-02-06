@@ -10,11 +10,14 @@ Route::get('/user', function (Request $request) {
 
 
 Route::apiResource('/status', App\Http\Controllers\StatusController::class);
+Route::apiResource('/role', App\Http\Controllers\RoleController::class);
+Route::post('/updateRole', 'App\Http\Controllers\RoleController@updateRole');
 Route::apiResource('/typeSignalement', App\Http\Controllers\TypeSignalementController::class);
 Route::apiResource('/signalement', App\Http\Controllers\SignalementController::class);
 Route::apiResource('/raison', App\Http\Controllers\RaisonController::class);
 Route::post('/getSignalementByCodeDeSuivi', 'App\Http\Controllers\SignalementController@getSignalementByCodeDeSuivi');
-Route::get('/messignalements/{user_id}', 'App\Http\Controllers\SignalementController@getUserSignalements');
+Route::get('/mesSignalements/{user_id}', 'App\Http\Controllers\SignalementController@getUserSignalements');
+Route::get('users', 'App\Http\Controllers\RegisterController@listingAdminAndSuperAdmin');
 
 
 
@@ -22,6 +25,7 @@ Route::get('/messignalements/{user_id}', 'App\Http\Controllers\SignalementContro
 Route::controller(App\Http\Controllers\RegisterController::class)->group(function()
 {
     Route::post('register', 'register');
+    Route::post('register/to/dashbord', 'registerToDashboard');
     Route::post('login', 'login');
     Route::get('me', 'getAuthenticatedUser')->middleware('auth:sanctum');
     Route::get('logout', 'logout')->middleware('auth:sanctum');

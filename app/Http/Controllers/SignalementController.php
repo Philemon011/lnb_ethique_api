@@ -45,8 +45,11 @@ class SignalementController extends Controller
         $signalement = Signalement::latest()->paginate(200);
         $signalement=DB::table('signalements')
                                 ->join('users','signalements.user_id' , '=', 'users.id')
-                                ->select('signalements.*')
+                                ->join('type_signalements', 'signalements.type_de_signalement_id', '=', 'type_signalements.id')
+                                ->join('statuses', 'signalements.status_id', '=', 'statuses.id')
+                                ->select('signalements.*','type_signalements.libelle', 'statuses.nom_status')
                                 ->where('users.id', $user->id)
+                                ->orderBy('signalements.created_at', 'asc')
                                 ->get();
         return response([
             'success' => true,
