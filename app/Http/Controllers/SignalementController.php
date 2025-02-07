@@ -9,11 +9,19 @@ use App\Http\Resources\PostResource;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\HistoriqueSignalement;
+use Illuminate\Support\Facades\Auth;
 
 
 
 class SignalementController extends Controller
 {
+
+    public function historique($id)
+    {
+        $historique = HistoriqueSignalement::where('signalement_id', $id)->with('user')->orderBy('created_at', 'desc')->get();
+        return response()->json($historique);
+    }
 
     public function index()
     {
@@ -43,14 +51,14 @@ class SignalementController extends Controller
         }
         //get posts
         $signalement = Signalement::latest()->paginate(200);
-        $signalement=DB::table('signalements')
-                                ->join('users','signalements.user_id' , '=', 'users.id')
-                                ->join('type_signalements', 'signalements.type_de_signalement_id', '=', 'type_signalements.id')
-                                ->join('statuses', 'signalements.status_id', '=', 'statuses.id')
-                                ->select('signalements.*','type_signalements.libelle', 'statuses.nom_status')
-                                ->where('users.id', $user->id)
-                                ->orderBy('signalements.created_at', 'asc')
-                                ->get();
+        $signalement = DB::table('signalements')
+            ->join('users', 'signalements.user_id', '=', 'users.id')
+            ->join('type_signalements', 'signalements.type_de_signalement_id', '=', 'type_signalements.id')
+            ->join('statuses', 'signalements.status_id', '=', 'statuses.id')
+            ->select('signalements.*', 'type_signalements.libelle', 'statuses.nom_status')
+            ->where('users.id', $user->id)
+            ->orderBy('signalements.created_at', 'asc')
+            ->get();
         return response([
             'success' => true,
             'data' => $signalement,
@@ -144,41 +152,100 @@ class SignalementController extends Controller
     }
 
 
+    // public function update(Request $request, Signalement $signalement)
+    // {
+    //     // Validation des données
+    //     $validator = Validator::make($request->all(), [
+    //         'status_id' => 'nullable|exists:statuses,id',
+    //         'cloturer_verification' => 'nullable|in:oui,non',
+    //         'raison' => 'nullable'
+    //     ]);
+
+
+    //     // Vérification des erreurs de validation
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     // Gestion dynamique du statut
+    //     if ($request->status_id) {
+    //         $status = \App\Models\Status::find($request->status_id);
+    //         if (!$status) {
+    //             return response()->json([
+    //                 'message' => 'Le statut spécifié est introuvable.',
+    //             ], 404);
+    //         }
+    //     }
+
+    //     $signalement->update([
+    //         'cloturer_verification' => $request->cloturer_verification ?? $signalement->cloturer_verification,
+    //         'raison' => $request->raison ?? $signalement->raison,
+    //         'status_id' => $request->status_id ?? $signalement->status_id, // Garde le statut actuel si non spécifié
+    //     ]);
+
+    //     // Retourne une réponse avec le signalement mis à jour
+    //     return response([
+    //         'success' => true,
+    //         'message' => "le  Signalement a été bien modifié !",
+    //     ], 200);
+    // }
+
     public function update(Request $request, Signalement $signalement)
     {
+        
         // Validation des données
         $validator = Validator::make($request->all(), [
             'status_id' => 'nullable|exists:statuses,id',
             'cloturer_verification' => 'nullable|in:oui,non',
-            'raison' => 'nullable'
+            'raison' => 'nullable',
+            'user_id'=>'nullable'
         ]);
-
 
         // Vérification des erreurs de validation
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        // Gestion dynamique du statut
-        if ($request->status_id) {
-            $status = \App\Models\Status::find($request->status_id);
-            if (!$status) {
-                return response()->json([
-                    'message' => 'Le statut spécifié est introuvable.',
-                ], 404);
-            }
-        }
+        // Sauvegarde des anciennes valeurs avant modification
+        $ancienSignalement = $signalement->toArray();
 
+        // Mise à jour du signalement
         $signalement->update([
             'cloturer_verification' => $request->cloturer_verification ?? $signalement->cloturer_verification,
             'raison' => $request->raison ?? $signalement->raison,
-            'status_id' => $request->status_id ?? $signalement->status_id, // Garde le statut actuel si non spécifié
+            'status_id' => $request->status_id ?? $signalement->status_id,
         ]);
 
-        // Retourne une réponse avec le signalement mis à jour
-        return response([
+        // Récupération des nouvelles valeurs
+        $nouvellesValeurs = $signalement->toArray();
+
+        // Comparaison des anciennes et nouvelles valeurs
+        $modifications = array_diff_assoc($nouvellesValeurs, $ancienSignalement);
+
+        if (isset($modifications['status_id'])) {
+            $ancienStatut = \App\Models\Status::find($ancienSignalement['status_id']);
+            $nouveauStatut = \App\Models\Status::find($nouvellesValeurs['status_id']);
+
+            $modifications['status'] = [
+                'ancien' => $ancienStatut ? $ancienStatut->nom_status : 'Inconnu',
+                'nouveau' => $nouveauStatut ? $nouveauStatut->nom_status : 'Inconnu'
+            ];
+
+            // unset($modifications['status_id']); // Supprime l'ID du tableau des modifications/
+        }
+
+        // Enregistrement de l'historique si des changements ont été faits
+        if (!empty($modifications)) {
+            HistoriqueSignalement::create([
+                'signalement_id' => $signalement->id,
+                'user_id' => $request->user_id, // L'utilisateur qui a fait la modification
+                'modifications' => $modifications, // Stocke les différences
+            ]);
+        }
+
+        return response()->json([
             'success' => true,
-            'message' => "le  Signalement a été bien modifié !",
+            'message' => "Le signalement a été bien modifié et l'historique enregistré !",
         ], 200);
     }
 

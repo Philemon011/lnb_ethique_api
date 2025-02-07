@@ -18,6 +18,7 @@ Route::apiResource('/raison', App\Http\Controllers\RaisonController::class);
 Route::post('/getSignalementByCodeDeSuivi', 'App\Http\Controllers\SignalementController@getSignalementByCodeDeSuivi');
 Route::get('/mesSignalements/{user_id}', 'App\Http\Controllers\SignalementController@getUserSignalements');
 Route::get('users', 'App\Http\Controllers\RegisterController@listingAdminAndSuperAdmin');
+Route::get('/signalements/{id}/historique', 'App\Http\Controllers\SignalementController@historique');
 
 
 
