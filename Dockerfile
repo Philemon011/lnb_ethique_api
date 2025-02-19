@@ -32,4 +32,4 @@ RUN php artisan key:generate
 EXPOSE 8000
 
 # Lancer l'application Laravel avec PHP Built-in Server
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
+CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000
