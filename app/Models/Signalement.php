@@ -19,6 +19,8 @@ class Signalement extends Model
         'date_evenement',
         'raison',
         'user_id',
+        'commentaires',
+        'reponse'
     ];
 
     public function status()

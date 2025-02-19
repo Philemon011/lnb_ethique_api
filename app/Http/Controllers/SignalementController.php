@@ -192,13 +192,15 @@ class SignalementController extends Controller
 
     public function update(Request $request, Signalement $signalement)
     {
-        
+
         // Validation des données
         $validator = Validator::make($request->all(), [
             'status_id' => 'nullable|exists:statuses,id',
             'cloturer_verification' => 'nullable|in:oui,non',
             'raison' => 'nullable',
-            'user_id'=>'nullable'
+            'user_id'=>'nullable',
+            'commentaires' => 'nullable|string',
+            'reponse' => 'nullable|string',
         ]);
 
         // Vérification des erreurs de validation
@@ -214,6 +216,8 @@ class SignalementController extends Controller
             'cloturer_verification' => $request->cloturer_verification ?? $signalement->cloturer_verification,
             'raison' => $request->raison ?? $signalement->raison,
             'status_id' => $request->status_id ?? $signalement->status_id,
+            'commentaires' => $request->commentaires ?? null,
+            'reponse' => $request->reponse ?? $signalement->reponse,
         ]);
 
         // Récupération des nouvelles valeurs
