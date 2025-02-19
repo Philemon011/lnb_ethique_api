@@ -1,15 +1,10 @@
 # Utiliser une image PHP avec FPM
 FROM php:8.2-fpm
 
-# Installer les dépendances système
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    unzip \
-    curl \
-    git \
-    nginx \
-    libssl-dev \
-    && docker-php-ext-install pdo pdo_pgsql openssl
+# Installer les dépendances système avec nettoyage
+RUN apt-get clean && apt-get update && \
+    apt-get install -y libpq-dev unzip curl git libssl-dev && \
+    docker-php-ext-install pdo pdo_pgsql openssl || tail -n 50 /var/log/apt/term.log
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -19,9 +14,6 @@ WORKDIR /var/www
 
 # Copier le projet Laravel
 COPY . .
-
-# Copier le fichier .env si nécessaire
-RUN cp .env.example .env
 
 # Installer les dépendances Laravel
 RUN composer install --no-dev --optimize-autoloader
