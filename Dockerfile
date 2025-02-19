@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     nginx \
-    && docker-php-ext-install pdo pdo_pgsql
+    libssl-dev \
+    && docker-php-ext-install pdo pdo_pgsql openssl
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -19,19 +20,15 @@ WORKDIR /var/www
 # Copier le projet Laravel
 COPY . .
 
+# Copier le fichier .env si nécessaire
+RUN cp .env.example .env
+
 # Installer les dépendances Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Donner les permissions nécessaires
+# Donner les permissions nécessaires pour les répertoires
 RUN chmod -R 777 storage bootstrap/cache
 
-# Générer la clé Laravel
-RUN php artisan key:generate
-
-
-# .env /
-
-# Set any ENVs
 # Définir les variables d'environnement
 ENV APP_KEY=${APP_KEY}
 ENV APP_NAME=${APP_NAME}
@@ -65,6 +62,9 @@ ENV PUSHER_APP_ID=${PUSHER_APP_ID}
 ENV PUSHER_APP_KEY=${PUSHER_APP_KEY}
 ENV PUSHER_APP_SECRET=${PUSHER_APP_SECRET}
 ENV PUSHER_APP_CLUSTER=${PUSHER_APP_CLUSTER}
+
+# Générer la clé Laravel et afficher l'environnement
+RUN echo "Environment: $(cat .env)" && php artisan key:generate
 
 # Exposer le port 8000
 EXPOSE 8000
