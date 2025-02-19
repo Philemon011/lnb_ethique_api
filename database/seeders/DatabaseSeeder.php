@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             StatusSeeder::class,
             TypeDeSignalementSeeder::class,
             RaisonSeeder::class,
+            RoleSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

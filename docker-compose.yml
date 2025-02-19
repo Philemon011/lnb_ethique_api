@@ -1,0 +1,70 @@
+
+# version: '3.8'
+
+services:
+  laravel_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_api
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=laravel
+      - DB_USERNAME=user
+      - DB_PASSWORD=password
+    depends_on:
+      - db
+    command: >
+      sh -c "
+      echo 'Waiting for database to be ready...' &&
+      sleep 10 &&
+      php artisan migrate --force &&
+      php artisan db:seed --force &&
+      php artisan serve --host=0.0.0.0 --port=8000
+      "
+
+
+  db:
+    image: postgres:latest
+    container_name: laravel_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: laravel
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+
+#   flutter_mobile:
+#     build: ./lnb_ethique_app
+#     container_name: flutter_mobile
+#     command: ["flutter", "build", "apk", "--release"]
+#     volumes:
+#       - ./lnb_ethique_app:/app
+#       - ./lnb_ethique_app/build:/app/build
+#     user: "flutteruser"
+
+#   flutter_desktop:
+#     build: ./admin_panel
+#     container_name: flutter_desktop
+#     command: ["flutter", "build", "windows"]
+#     volumes:
+#       - ./admin_panel:/app
+#       - ./admin_panel/build:/app/build
+#     user: "flutteruser"
+
+networks:
+  laravel_network:
+    external: true
+
+volumes:
+  pg_data:
